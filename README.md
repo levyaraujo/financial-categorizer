@@ -36,22 +36,14 @@ A machine learning project for classifying financial messages into categories us
    If you use `uv` or another modern installer, you can also run:
 
    ```bash
-   uv pip install -r requirements.txt
+   uv pip install -r pyproject.toml
    ```
 
 ## Usage
 
-### 1. Generate the Dataset (Optional)
-
-If you want to regenerate the dataset:
-
-```bash
-python src/dataset.py
-```
-
 This will create or overwrite `financial_messages.csv`.
 
-### 2. Train the Model
+### 1. Train the Model
 
 ```bash
 python src/main.py
@@ -63,7 +55,7 @@ This will:
 - Save the label encoder to `label_encoder.joblib`.
 - Save model checkpoints to the `results/` directory.
 
-### 3. Run Inference
+### 2. Run Inference
 
 After training, you can classify new messages interactively:
 
@@ -88,7 +80,3 @@ All dependencies are listed in `pyproject.toml`. Key packages:
 - `joblib`
 - `datasets`
 - `accelerate`
-
-## License
-
-MIT (or specify your license here).

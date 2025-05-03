@@ -12,7 +12,7 @@ def normalize_value(text):
 
 
 def load_model_and_tokenizer(
-    model_path="/home/lev0x/scratches/bertimbau/results/checkpoint-550",
+    model_path="/home/lev0x/scratches/categorizer/results/checkpoint-550",
 ):
     tokenizer = AutoTokenizer.from_pretrained("neuralmind/bert-base-portuguese-cased")
 

@@ -12,7 +12,7 @@ from transformers import (
 )
 import torch
 
-df = pd.read_csv("/home/lev0x/scratches/bertimbau/financial_messages.csv")
+df = pd.read_csv("/home/lev0x/scratches/categorizer/financial_messages.csv")
 
 le = LabelEncoder()
 df["label_id"] = le.fit_transform(df["label"])

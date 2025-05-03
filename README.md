@@ -3,8 +3,6 @@
 A machine learning project for classifying financial messages into categories using BERTimbau (BERT for Portuguese).
 
 ## Project Structure
-
-- `main.py`: Simple hello-world entry point.
 - `src/`
   - `main.py`: Trains a BERT-based classifier on financial messages.
   - `inference.py`: Loads a trained model and predicts the category of new messages.

@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y curl && \
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv pip install --system . && uv cache clean
+RUN uv pip install --system -r pyproject.toml . && uv cache clean
 
 COPY . .
 
@@ -33,9 +33,6 @@ FROM base AS final
 
 # Copy only needed files from builder
 COPY --from=builder /app /app
-
-# Install uvicorn for production server
-RUN pip install "uvicorn[standard]"
 
 EXPOSE 8080
 

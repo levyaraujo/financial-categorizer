@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y curl && \
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv pip install . && uv pip cache clean
+RUN uv pip install --system . && uv pip cache clean
 
 COPY . .
 

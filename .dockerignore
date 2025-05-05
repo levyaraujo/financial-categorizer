@@ -1,5 +1,4 @@
 tests/
 pyproject.toml
 README.md
-uv.lock
 .python-version

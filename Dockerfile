@@ -3,11 +3,9 @@
 # ─────────────────────────────
 FROM python:3.12-slim-bullseye AS base
 
-# Prevents Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
-# Ensures stdout/stderr is unbuffered (useful for logs)
 ENV PYTHONUNBUFFERED=1
-ENV PATH="/usr/local/bin:$PATH"
+ENV PATH="/root/.local/bin:/usr/local/bin:$PATH"
 
 WORKDIR /app
 
@@ -16,16 +14,14 @@ WORKDIR /app
 # ─────────────────────────────
 FROM base AS builder
 
-# Install build tools & uv
-RUN apt-get update && apt-get install -y curl && \
-    pip install uv && \
-    apt-get purge -y --auto-remove curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl ca-certificates
+
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv venv && \
-    uv pip install -r pyproject.toml && \
-    uv cache clean
+RUN uv sync --frozen --no-cache && uv cache clean
 
 COPY . .
 
@@ -34,13 +30,14 @@ COPY . .
 # ─────────────────────────────
 FROM base AS final
 
-# Copy only needed files from builder
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app .
+COPY --from=builder /app /app
 
-RUN uv pip list
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 
 EXPOSE 8080
 
-# Start the FastAPI app with Uvicorn
+RUN source /app/.venv/bin/activate
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]

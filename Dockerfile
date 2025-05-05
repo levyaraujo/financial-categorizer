@@ -35,7 +35,10 @@ COPY . .
 FROM base AS final
 
 # Copy only needed files from builder
-COPY --from=builder /app /app
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app .
+
+RUN uv pip list
 
 EXPOSE 8080
 

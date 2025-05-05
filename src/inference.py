@@ -1,18 +1,20 @@
+import os
 import re
 
 import joblib
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch.nn.functional as F
 
 le = joblib.load("label_encoder.joblib")
-
+MODEL_PATH = os.getenv("MODEL_PATH")
 
 def normalize_value(text):
     return re.sub(r"R\$ ?[\d\.,]+|[\d\.,]+", "<VALOR>", text)
 
 
 def load_model_and_tokenizer(
-    model_path="/home/lev0x/scratches/categorizer/results/checkpoint-550",
+    model_path=MODEL_PATH,
 ):
     tokenizer = AutoTokenizer.from_pretrained("neuralmind/bert-base-portuguese-cased")
 
@@ -31,9 +33,16 @@ def predict_category(message: str, model, tokenizer):
 
     with torch.no_grad():
         outputs = model(**inputs)
-        predicted = torch.argmax(outputs.logits, dim=1).item()
+        logits = outputs.logits
+        probs = F.softmax(logits, dim=1)  # Apply softmax
+        predicted_class = torch.argmax(probs, dim=1).item()
+        confidence = probs[0, predicted_class].item()  # Get confidence score
 
-    return le.inverse_transform([predicted])[0]
+        print(confidence)
+
+
+    category = le.inverse_transform([predicted_class])[0]
+    return category
 
 
 if __name__ == "__main__":

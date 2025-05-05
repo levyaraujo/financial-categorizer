@@ -1,3 +1,4 @@
+import os
 import re
 import joblib
 
@@ -12,7 +13,7 @@ from transformers import (
 )
 import torch
 
-df = pd.read_csv("/home/lev0x/scratches/categorizer/financial_messages.csv")
+df = pd.read_csv(os.getenv("DATASET_PATH"))
 
 le = LabelEncoder()
 df["label_id"] = le.fit_transform(df["label"])

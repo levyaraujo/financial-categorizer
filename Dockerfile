@@ -7,6 +7,7 @@ FROM python:3.12-slim-bullseye AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 # Ensures stdout/stderr is unbuffered (useful for logs)
 ENV PYTHONUNBUFFERED=1
+ENV PATH="/usr/local/bin:$PATH"
 
 WORKDIR /app
 
@@ -22,7 +23,9 @@ RUN apt-get update && apt-get install -y curl && \
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv pip install --system -r pyproject.toml && uv cache clean
+RUN uv venv && \
+    uv pip install -r pyproject.toml && \
+    uv cache clean
 
 COPY . .
 

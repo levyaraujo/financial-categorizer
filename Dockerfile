@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y curl && \
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv pip install --system -r pyproject.toml . && uv cache clean
+RUN uv pip install --system -r pyproject.toml && uv cache clean
 
 COPY . .
 
@@ -35,9 +35,6 @@ FROM base AS final
 COPY --from=builder /app /app
 
 EXPOSE 8080
-
-# Optional: Healthcheck endpoint
-HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
 
 # Start the FastAPI app with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]

@@ -133,6 +133,7 @@ dependencies = [
     { name = "pandas" },
     { name = "scikit-learn" },
     { name = "transformers", extra = ["torch"] },
+    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -143,6 +144,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "transformers", extras = ["torch"], specifier = ">=4.51.3" },
+    { name = "uvicorn", specifier = ">=0.34.2" },
 ]
 
 [[package]]

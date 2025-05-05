@@ -1,34 +1,46 @@
+# ─────────────────────────────
+# Base Image: Minimal Python
+# ─────────────────────────────
 FROM python:3.12-slim-bullseye AS base
 
+# Prevents Python from writing .pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+# Ensures stdout/stderr is unbuffered (useful for logs)
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-# Install uv
-RUN apt-get update && apt-get install -y curl && \
-    pip install uv
-
-
-# ───────────────────────────────────────────────
-
+# ─────────────────────────────
+# Builder Stage: Install deps
+# ─────────────────────────────
 FROM base AS builder
 
-WORKDIR /app
+# Install build tools & uv
+RUN apt-get update && apt-get install -y curl && \
+    pip install uv && \
+    apt-get purge -y --auto-remove curl && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml uv.lock .
+COPY pyproject.toml uv.lock ./
 
-RUN uv venv
-
-RUN uv pip install .
+RUN uv pip install . && uv pip cache clean
 
 COPY . .
 
-# ───────────────────────────────────────────────
-
+# ─────────────────────────────
+# Final Stage: Runtime Image
+# ─────────────────────────────
 FROM base AS final
 
+# Copy only needed files from builder
 COPY --from=builder /app /app
+
+# Install uvicorn for production server
+RUN pip install "uvicorn[standard]"
 
 EXPOSE 8080
 
-CMD ["fastapi", "main:app", "--port", "8080", "--host", "0.0.0.0"]
+# Optional: Healthcheck endpoint
+HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
+
+# Start the FastAPI app with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]

@@ -38,6 +38,5 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 EXPOSE 8080
 
-RUN source /app/.venv/bin/activate
 
 CMD ["/app/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]

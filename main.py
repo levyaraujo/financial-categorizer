@@ -12,7 +12,6 @@ async def lifespan(app: FastAPI):
     app.state.model.eval()
     yield
 
-
 app = FastAPI(lifespan=lifespan)
 
 

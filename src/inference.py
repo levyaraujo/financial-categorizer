@@ -2,12 +2,13 @@ import os
 import re
 import time
 import logging
+import functools
 
 import joblib
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
-
+import torch.nn as nn
 import dotenv
 
 dotenv.load_dotenv()
@@ -22,6 +23,7 @@ def normalize_value(text):
     return re.sub(r"R\$ ?[\d\.,]+|[\d\.,]+", "<VALOR>", text)
 
 
+@functools.lru_cache(maxsize=1)
 def load_model_and_tokenizer(
     model_path=MODEL_PATH,
 ):
@@ -33,9 +35,19 @@ def load_model_and_tokenizer(
     start_time = time.time()
     logger.info("Loading model...")
     model = AutoModelForSequenceClassification.from_pretrained(model_path)
-    model.eval()
-    logger.info(f"Model loaded in {time.time() - start_time:.2f} seconds")
 
+    # Quantize the model to int8
+    logger.info("Quantizing model...")
+    model = torch.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)
+
+    # Convert model to TorchScript for better CPU performance
+    logger.info("Optimizing with TorchScript...")
+    model.eval()
+
+    # Optimize memory usage
+    torch.cuda.empty_cache()
+
+    logger.info(f"Model loaded and optimized in {time.time() - start_time:.2f} seconds")
     return model, tokenizer
 
 
@@ -51,11 +63,11 @@ def predict_category(message: str, model, tokenizer):
 
     inference_start = time.time()
     with torch.no_grad():
-        outputs = model(**inputs)
-        logits = outputs.logits
-        probs = F.softmax(logits, dim=1)
-        predicted_class = torch.argmax(probs, dim=1).item()
-        confidence = probs[0, predicted_class].item()
+        with torch.inference_mode():
+            outputs = model(**inputs)
+            logits = outputs.logits
+            probs = F.softmax(logits, dim=1)
+            predicted_class = torch.argmax(probs, dim=1).item()
 
     logger.info(
         f"Model inference completed in {time.time() - inference_start:.2f} seconds"

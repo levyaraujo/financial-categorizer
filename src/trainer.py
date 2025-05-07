@@ -2,6 +2,7 @@ import os
 import re
 import joblib
 
+import dotenv
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
@@ -12,6 +13,8 @@ from transformers import (
     TrainingArguments,
 )
 import torch
+
+dotenv.load_dotenv()
 
 df = pd.read_csv(os.getenv("DATASET_PATH"))
 
@@ -59,7 +62,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
 )
 
 training_args = TrainingArguments(
-    output_dir="./results",
+    output_dir="results",
     per_device_train_batch_size=8,
     per_device_eval_batch_size=8,
     num_train_epochs=5,
@@ -82,5 +85,9 @@ trainer = Trainer(
     eval_dataset=val_dataset,
 )
 
+print("Training...")
 trainer.train()
+
+print("Saving model...")
 joblib.dump(le, "label_encoder.joblib")
+print("Done!")

@@ -21,7 +21,7 @@ RUN sh /uv-installer.sh && rm /uv-installer.sh
 
 COPY pyproject.toml uv.lock ./
 
-RUN uv sync --frozen --no-cache && uv cache clean
+RUN uv sync --frozen
 
 COPY . .
 

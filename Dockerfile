@@ -36,7 +36,7 @@ ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 
-EXPOSE 8080
+EXPOSE 8000
 
 
-CMD ["/app/.venv/bin/uvicorn", "main:app", "--host", "::", "--port", "8080", "--workers", "4"]
+CMD ["fastapi", "run"]

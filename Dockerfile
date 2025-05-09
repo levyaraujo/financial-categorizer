@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y curl ca-certificates
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 
+# Copy only dependency files first
 COPY pyproject.toml uv.lock ./
-
 RUN uv sync --frozen
 
 COPY . .
@@ -35,8 +35,10 @@ COPY --from=builder /app /app
 ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+# Make the startup script executable
+RUN chmod +x /app/start.sh
 
 EXPOSE 8000
 
-
-CMD ["fastapi", "run"]
+# Use the startup script instead of directly running fastapi
+CMD ["/app/start.sh"]
